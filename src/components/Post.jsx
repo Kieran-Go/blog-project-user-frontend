@@ -1,9 +1,11 @@
 import { useParams } from 'react-router-dom';
 import useFetchData from '../hooks/useFetchData';
 import { Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { AuthContext } from '../contexts/AuthContext.jsx';
 
 function Post() {
+  const { user } = useContext(AuthContext);
   const { id } = useParams();
   const serverOrigin = import.meta.env.VITE_SERVER_ORIGIN;
   const [comments, setComments] = useState([]);
@@ -44,6 +46,31 @@ function Post() {
     }
   };
 
+  const handleDeleteComment = async (commentId) => {
+        try {
+            const response = await fetch(`${serverOrigin}/comments/${commentId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to delete comment');
+            }
+
+            // Remove the deleted comment from local state
+            setComments((prevComments) =>
+                prevComments.filter((comment) => comment.id !== commentId)
+            );
+        } catch (err) {
+            console.error('Delete error:', err.message);
+        }
+    };
+
+
   if (loading) return <p>Loading post...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
@@ -53,7 +80,7 @@ function Post() {
       <h3>Author: {data.user.name}</h3>
       <p>{data.content}</p>
 
-      {token && (
+      {user && (
         <form onSubmit={handleSubmit}>
           <textarea
             value={commentText}
@@ -69,9 +96,12 @@ function Post() {
 
       <h4>Comments:</h4>
       {comments.map((comment) => (
-        <div className='comment'>
+        <div className='comment' key={comment.id}>
             <h5>{comment.user.name} at {comment.postedAt}</h5>
             <p>{comment.content}</p>
+            {user && user.id == comment.user.id &&
+                <button onClick={() => handleDeleteComment(comment.id)}>Remove Comment</button>
+            }
         </div>
       ))}
 

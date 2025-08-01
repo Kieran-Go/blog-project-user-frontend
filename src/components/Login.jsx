@@ -9,29 +9,29 @@ export default function Login() {
   const { setUser } = useContext(AuthContext);
 
   async function handleSubmit(e) {
-    e.preventDefault();
+        e.preventDefault();
 
-    const res = await fetch(`${import.meta.env.VITE_SERVER_ORIGIN}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, password }),
-    });
+        const res = await fetch(`${import.meta.env.VITE_SERVER_ORIGIN}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, password }),
+        });
 
-    const data = await res.json();
+        const data = await res.json();
 
-    if (res.ok) {
-      localStorage.setItem('token', data.token);
-      setUser(data.user);
-      navigate('/home');
-    } else {
-      alert(data.message || 'Login failed');
-    }
-  }
+        if (res.ok) {
+            localStorage.setItem('token', data.token);
+            setUser(data.user);
+            navigate('/home');
+        } else {
+            alert(data.message || 'Login failed');
+        }
+  } 
 
   return (
     <form onSubmit={handleSubmit}>
       <input 
-        type="name" 
+        type="text" 
         value={name}
         onChange={(e) => setName(e.target.value)} 
         placeholder="Username" 

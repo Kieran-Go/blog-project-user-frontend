@@ -18,7 +18,6 @@ export default function Signup() {
         });
 
         const data = await res.json();
-        console.log('DATA: ' + data.token);
 
         if (res.ok) {
             localStorage.setItem('token', data.token);
@@ -32,7 +31,7 @@ export default function Signup() {
   return (
     <form onSubmit={handleSubmit}>
       <input 
-        type="name" 
+        type="text" 
         value={name}
         onChange={(e) => setName(e.target.value)} 
         placeholder="Username" 

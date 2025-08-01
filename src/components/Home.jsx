@@ -6,10 +6,7 @@ function Home() {
   const { data, loading, error } = useFetchData(`${serverOrigin}/posts/published`);
   
   if (loading) return <p>Loading posts...</p>;
-  if (error) {
-    // if (error?.status === 403) return <p>You must be logged in to view posts.</p>;
-    return <p>Error: {error.message}</p>;
-  }
+  if (error) return <p>Error: {error.message}</p>;
 
   return (
     <div>
