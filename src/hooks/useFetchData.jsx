@@ -1,29 +1,44 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from 'react';
 
 function useFetchData(url) {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const response = await fetch(url, { mode: "cors" });
-        
-        if (!response.ok) {
-          throw new Error(`Server error: ${response.status}`);
-        }
+    const token = localStorage.getItem('token');
 
-        const fetchedData = await response.json();
-        setData(fetchedData);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
+    fetch(url, {
+      headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  .then((res) => {
+    if (!res.ok) {
+      // Create a custom error for 403
+      if (res.status === 403) {
+        const error = new Error('Forbidden');
+        error.status = 403;
+        throw error;
       }
-    };
 
-    loadData();
+      // For other errors, try to extract the actual message
+      return res.json().then((body) => {
+        const error = new Error(body.message || 'Fetch failed');
+        error.status = res.status;
+        throw error;
+      });
+    }
+    return res.json();
+  })
+  .then((data) => {
+    setData(data);
+    setLoading(false);
+  })
+  .catch((err) => {
+    setError(err);
+    setLoading(false);
+  });
   }, [url]);
 
   return { data, loading, error };
